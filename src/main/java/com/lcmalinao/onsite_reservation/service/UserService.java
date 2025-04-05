@@ -1,11 +1,11 @@
 package com.lcmalinao.onsite_reservation.service;
 
 import com.lcmalinao.onsite_reservation.dto.UserDto;
+import com.lcmalinao.onsite_reservation.exception.ResourceNotFoundException;
 import com.lcmalinao.onsite_reservation.mapper.UserMapper;
 import com.lcmalinao.onsite_reservation.model.User;
 import com.lcmalinao.onsite_reservation.repository.DepartmentRepository;
 import com.lcmalinao.onsite_reservation.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,13 +36,13 @@ public class UserService {
 
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         return userMapper.toDto(user);
     }
 
     public UserDto getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
         return userMapper.toDto(user);
     }
 
@@ -62,7 +62,7 @@ public class UserService {
         // Validate department exists
         if (user.getDepartment() != null && user.getDepartment().getDepartmentId() != null) {
             departmentRepository.findById(user.getDepartment().getDepartmentId())
-                    .orElseThrow(() -> new EntityNotFoundException("Department not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Department", "id", user.getDepartment().getDepartmentId()));
         }
 
         User savedUser = userRepository.save(user);
@@ -72,7 +72,7 @@ public class UserService {
     @Transactional
     public UserDto updateUser(Long id, User userDetails) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         user.setUsername(userDetails.getUsername());
         user.setEmail(userDetails.getEmail());
@@ -87,7 +87,7 @@ public class UserService {
         // Update department if provided
         if (userDetails.getDepartment() != null && userDetails.getDepartment().getDepartmentId() != null) {
             user.setDepartment(departmentRepository.findById(userDetails.getDepartment().getDepartmentId())
-                    .orElseThrow(() -> new EntityNotFoundException("Department not found")));
+                    .orElseThrow(() -> new ResourceNotFoundException("Department", "id", userDetails.getDepartment().getDepartmentId())));
         }
 
         User updatedUser = userRepository.save(user);
@@ -97,7 +97,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("User not found with id: " + id);
+            throw new ResourceNotFoundException("User", "id", id);
         }
         userRepository.deleteById(id);
     }
