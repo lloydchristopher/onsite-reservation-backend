@@ -8,6 +8,7 @@ import com.lcmalinao.onsite_reservation.model.User;
 import com.lcmalinao.onsite_reservation.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +79,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest,
+                                   HttpServletRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -89,13 +91,20 @@ public class AuthController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Return user details
+            // Explicitly create a session and store the authentication
+            HttpSession session = request.getSession(true);
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+            // Return user details and session ID for debugging
             UserDto userDto = userService.getUserByUsername(loginRequest.getUsername());
 
             Map<String, Object> response = new HashMap<>();
             response.put("user", userDto);
             response.put("message", "Login successful");
+            response.put("sessionId", session.getId());
 
+            System.out.println("Authenticated user: " + authentication);
+            System.out.println(authentication.getName());
             return ResponseEntity.ok(response);
         } catch (BadCredentialsException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -121,8 +130,57 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
-        return ResponseEntity.ok(userService.getUserByUsername(authentication.getName()));
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+        // Get the current authentication from the session
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
+
+        try {
+            UserDto userDto = userService.getUserByUsername(authentication.getName());
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            Map<String, Object> debugInfo = new HashMap<>();
+            debugInfo.put("error", e.getMessage());
+            debugInfo.put("authName", authentication.getName());
+            debugInfo.put("isAuthenticated", authentication.isAuthenticated());
+            debugInfo.put("sessionId", request.getSession(false) != null ?
+                    request.getSession().getId() : "No session");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(debugInfo);
+        }
+    }
+
+    @GetMapping("/session-debug")
+    public ResponseEntity<Map<String, Object>> debugSession(HttpServletRequest request) {
+        Map<String, Object> debugInfo = new HashMap<>();
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            debugInfo.put("sessionId", session.getId());
+            debugInfo.put("sessionCreationTime", session.getCreationTime());
+            debugInfo.put("sessionLastAccessedTime", session.getLastAccessedTime());
+            debugInfo.put("sessionMaxInactiveInterval", session.getMaxInactiveInterval());
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                debugInfo.put("authName", auth.getName());
+                debugInfo.put("authType", auth.getClass().getName());
+                debugInfo.put("isAuthenticated", auth.isAuthenticated());
+                debugInfo.put("authorities", auth.getAuthorities());
+            } else {
+                debugInfo.put("auth", "No authentication in context");
+            }
+        } else {
+            debugInfo.put("session", "No active session");
+        }
+
+        return ResponseEntity.ok(debugInfo);
     }
 }
 
