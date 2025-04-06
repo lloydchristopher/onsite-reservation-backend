@@ -5,6 +5,7 @@ import com.lcmalinao.onsite_reservation.exception.ResourceNotFoundException;
 import com.lcmalinao.onsite_reservation.mapper.UserMapper;
 import com.lcmalinao.onsite_reservation.model.User;
 import com.lcmalinao.onsite_reservation.repository.DepartmentRepository;
+import com.lcmalinao.onsite_reservation.repository.DeskRepository;
 import com.lcmalinao.onsite_reservation.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,15 +18,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
+    private final DeskRepository deskRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
-                       DepartmentRepository departmentRepository,
+                       DepartmentRepository departmentRepository, DeskRepository deskRepository,
                        UserMapper userMapper,
                        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
+        this.deskRepository = deskRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
@@ -88,6 +91,12 @@ public class UserService {
         if (userDetails.getDepartment() != null && userDetails.getDepartment().getDepartmentId() != null) {
             user.setDepartment(departmentRepository.findById(userDetails.getDepartment().getDepartmentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Department", "id", userDetails.getDepartment().getDepartmentId())));
+        }
+
+        // Update desk if provided
+        if (userDetails.getDesk() != null && userDetails.getDesk().getDeskId() != null) {
+            user.setDesk(deskRepository.findById(userDetails.getDesk().getDeskId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Desk", "id", userDetails.getDesk().getDeskId())));
         }
 
         User updatedUser = userRepository.save(user);

@@ -25,11 +25,15 @@ public class User {
     private String role;
     private String password;
 
-    @Column(name = "active")
+    @Column(name = "active", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @OneToOne
+    @JoinColumn(name = "desk_id")
+    private Desk desk;
 
 }

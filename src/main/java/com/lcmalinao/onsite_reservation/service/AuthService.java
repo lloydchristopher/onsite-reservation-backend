@@ -1,7 +1,7 @@
 package com.lcmalinao.onsite_reservation.service;
 
-import com.lcmalinao.onsite_reservation.dto.LoginRequest;
-import com.lcmalinao.onsite_reservation.dto.RegisterRequest;
+import com.lcmalinao.onsite_reservation.dto.request.LoginRequest;
+import com.lcmalinao.onsite_reservation.dto.request.RegisterRequest;
 import com.lcmalinao.onsite_reservation.dto.UserDto;
 import com.lcmalinao.onsite_reservation.exception.AuthenticationException;
 import com.lcmalinao.onsite_reservation.exception.DuplicateResourceException;

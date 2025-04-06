@@ -1,4 +1,4 @@
-package com.lcmalinao.onsite_reservation.dto;
+package com.lcmalinao.onsite_reservation.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
