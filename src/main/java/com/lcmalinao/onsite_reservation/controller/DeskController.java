@@ -26,8 +26,14 @@ public class DeskController {
         return ApiResponse.ok(deskService.getAllDesks());
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/user/{username}")
     public ResponseEntity<ApiResponse<DeskDto>> getDeskByUsername(@PathVariable String username) {
         return ApiResponse.ok(deskService.getDeskByUsername(username));
+    }
+
+    @GetMapping("/section/{section}")
+    public ResponseEntity<ApiResponse<List<DeskDto>>> getDesksBySectionName(@PathVariable String section) {
+        System.out.println("Section: " + section);
+        return ApiResponse.ok(deskService.getDesksBySectionName(section));
     }
 }

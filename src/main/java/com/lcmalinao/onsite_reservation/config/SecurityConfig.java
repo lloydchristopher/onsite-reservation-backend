@@ -50,6 +50,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                                 "/api/auth/session-debug",
                                 "/api/users/**",
                                 "/api/desks/**",
+                                "/api/desks/**/**",
                                 "test/hello",
                                 "test/encode"
                         )

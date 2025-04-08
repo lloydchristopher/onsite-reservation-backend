@@ -33,4 +33,9 @@ public class DeskService {
 
         return deskMapper.toDto(deskRepository.findByUser(user));
     }
+
+    public List<DeskDto> getDesksBySectionName(String section) {
+        System.out.println("Section: " + section);
+        return deskMapper.toDtoList(deskRepository.findBySectionContaining(section));
+    }
 }
