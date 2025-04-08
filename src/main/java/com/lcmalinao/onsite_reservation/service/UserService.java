@@ -79,6 +79,8 @@ public class UserService {
 
         user.setUsername(userDetails.getUsername());
         user.setEmail(userDetails.getEmail());
+        user.setFirstName(userDetails.getFirstName());
+        user.setLastName(userDetails.getLastName());
         user.setRole(userDetails.getRole());
         user.setActive(userDetails.isActive());
 

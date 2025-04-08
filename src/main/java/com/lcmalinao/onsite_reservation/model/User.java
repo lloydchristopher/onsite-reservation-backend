@@ -1,6 +1,7 @@
 package com.lcmalinao.onsite_reservation.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,9 @@ public class User {
 
     @Column(unique = true)
     private String email;
+
+    private String firstName;
+    private String lastName;
 
     private String role;
     private String password;

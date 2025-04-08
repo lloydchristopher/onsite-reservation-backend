@@ -18,8 +18,16 @@ public class UserMapper {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
+        dto.setFirstName(user.getFirstName());
+        dto.setLastName(user.getLastName());
         dto.setRole(user.getRole());
         dto.setActive(user.isActive());
+
+        if (user.getDesk() != null) {
+            dto.setDeskId(user.getDesk().getDeskId());
+        } else {
+            dto.setDeskId("");
+        }
 
         if (user.getDepartment() != null) {
             dto.setDepartmentId(user.getDepartment().getDepartmentId());
